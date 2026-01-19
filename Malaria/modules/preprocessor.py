@@ -13,4 +13,4 @@ def load_and_preprocess(image_path, target_size=(128, 128)):
     
     img = img.astype('float32') / 255.0
     
-    return img
+    return img 

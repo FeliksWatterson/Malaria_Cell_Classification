@@ -48,3 +48,4 @@ history = model.fit(
 
 save_path = os.path.join(current_dir, 'malaria_model.h5')
 model.save(save_path)
+
