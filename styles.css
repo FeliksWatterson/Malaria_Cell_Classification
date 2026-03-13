@@ -1,0 +1,78 @@
+/* Global layout */
+.main {
+    background-color: #f0f2f6;
+}
+
+.block-container {
+    max-width: 1200px;
+    padding-top: 1.5rem;
+}
+
+/* Hide sidebar */
+div[data-testid="stSidebar"] {
+    display: none;
+}
+
+/* Buttons */
+.stButton>button {
+    width: 100%;
+    background: linear-gradient(135deg, #4b4bff, #7b7bff);
+    color: white;
+    border-radius: 999px;
+    border: none;
+    padding: 0.6rem 1.0rem;
+    font-weight: 600;
+}
+
+.stButton>button:hover {
+    background: linear-gradient(135deg, #3b3bdf, #6b6bef);
+}
+
+/* Grid cards */
+.image-card {
+    background: transparent;
+    border-radius: 0;
+    padding: 0.5rem 0.25rem;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 0;
+}
+
+.image-card img {
+    border-radius: 8px;
+}
+
+.image-card-caption {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 0.35rem;
+    text-align: center;
+    word-break: break-all;
+}
+
+.image-card-diag {
+    margin-top: 0.45rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    width: 100%;
+}
+
+.image-card-conf {
+    font-size: 0.85rem;
+    color: #555;
+    text-align: center;
+    margin-top: 0.1rem;
+    width: 100%;
+}
+
+.diag-positive {
+    color: #d32f2f;
+}
+
+.diag-negative {
+    color: #2e7d32;
+}
