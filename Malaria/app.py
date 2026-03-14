@@ -51,8 +51,8 @@ def segment_and_classify(opencv_image, model, conf_threshold=0.5, min_area=200):
         blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU,
     )
     kernel = np.ones((3,3), np.uint8)
-    thresh = cv2.erode(thresh, kernel, iterations=3) 
-    thresh = cv2.dilate(thresh, kernel, iterations=1)
+    thresh = cv2.erode(thresh, kernel, iterations=2) 
+    thresh = cv2.dilate(thresh, kernel, iterations=2)
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     parasitized_count = 0
@@ -136,7 +136,6 @@ with tab_main:
                         input_image = cv2.imdecode(file_bytes, 1)
                         input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
 
-                        # Dự đoán kết quả
                         input_tensor = preprocess_input(input_image)
                         pred = model.predict(input_tensor)
                         score = pred[0][0]
@@ -150,7 +149,6 @@ with tab_main:
                             color = "success"
                             conf = float(1 - score)
 
-                        # Hiển thị ảnh sạch (không khoanh vùng)
                         display_image = cv2.resize(input_image, (250, 250))
 
                         results.append(
@@ -218,9 +216,9 @@ with tab_main:
                         c3.metric("Âm tính (Khỏe mạnh)", u_count)
 
 with tab_detail:
-    st.markdown("#### Phân tích chi tiết từng ảnh")
+    st.markdown("#### Phân tích chi tiết từng bước thuật toán (Step-by-Step Pipeline)")
     detail_file = st.file_uploader(
-        "Chọn một ảnh để xem từng bước xử lý",
+        "Chọn một ảnh...",
         type=["jpg", "png", "jpeg"],
         accept_multiple_files=False,
         key="detail_uploader",
@@ -231,29 +229,65 @@ with tab_detail:
         input_image = cv2.imdecode(file_bytes, 1)
         input_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2RGB)
 
-        equalized = manual_histogram_equalization(input_image)
-        resized = manual_resize(equalized, (128, 128))
-        normalized = resized.astype("float32") / 255.0
-        input_tensor = np.expand_dims(normalized, axis=0)
-        pred = model.predict(input_tensor)
-        score = float(pred[0][0])
-        infected_prob = score
-        uninfected_prob = 1.0 - score
-
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.image(input_image, caption="Ảnh gốc", width=280)
-        with col2:
-            st.image(equalized, caption="Sau cân bằng histogram", width=280)
-        with col3:
-            st.image(resized, caption="Sau resize về 128×128", width=128)
-
-        st.markdown("#### Xác suất dự đoán")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.metric("Dương tính", f"{infected_prob*100:.1f}%")
-        with c2:
-            st.metric("Âm tính", f"{uninfected_prob*100:.1f}%")
+        st.markdown("---")
+        
+        # Bước 1: Ảnh gốc
+        st.markdown("##### Bước 1: Ảnh gốc đầu vào")
+        st.image(input_image, width=400)
+        
+        # Bước 2: Chuyển xám và Lọc nhiễu
+        st.markdown("##### Bước 2: Xử lý xám và Lọc nhiễu (Gaussian Blur)")
+        gray = cv2.cvtColor(input_image, cv2.COLOR_RGB2GRAY)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        st.image(blurred, width=400, caption="Giúp loại bỏ nhiễu hạt, làm mịn ảnh trước khi phân đoạn")
+        
+        st.markdown("##### Bước 3: Phân đoạn ảnh (Otsu Thresholding & Morphology)")
+        _, thresh = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+        kernel = np.ones((3,3), np.uint8)
+        thresh = cv2.erode(thresh, kernel, iterations=2) 
+        thresh = cv2.dilate(thresh, kernel, iterations=2)
+        st.image(thresh, width=400, caption="Tách biệt vùng chứa tế bào (màu trắng) khỏi nền (màu đen)")
+        
+        st.markdown("#####  Bước 4: Trích xuất và khoanh vùng")
+        
+        contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        output_img = input_image.copy()
+        p_count = 0
+        u_count = 0
+        if len(contours) > 0:
+            with st.spinner("Đang tải kết quả..."):
+                for i, cnt in enumerate(contours):
+                    area = cv2.contourArea(cnt)
+                    if area < 200: 
+                        continue
+                    
+                    x, y, w, h = cv2.boundingRect(cnt)
+                    roi = input_image[y:y+h, x:x+w]
+                    equalized = manual_histogram_equalization(roi)
+                    resized = manual_resize(equalized, (128, 128))
+                    normalized = resized.astype("float32") / 255.0
+                    input_tensor = np.expand_dims(normalized, axis=0)
+                    pred = model.predict(input_tensor, verbose=0)
+                    score = float(pred[0][0])
+                
+                    if score > 0.5:
+                        color = (255, 0, 0)
+                        label = f"M: {score*100:.1f}%"
+                        p_count += 1
+                    else:
+                        color = (0, 255, 0)
+                        label = f"N: {(1-score)*100:.1f}%"
+                        u_count += 1
+                        
+                    cv2.rectangle(output_img, (x, y), (x+w, y+h), color, 2)
+                    text_y = y - 8 if y - 8 > 15 else y + h + 20
+                    cv2.putText(output_img, label, (x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+            
+            st.image(output_img, caption="Kết quả khoanh vùng và phân loại cuối cùng", width=600)
+            st.info(f"Phát hiện **{p_count}** tế bào nhiễm bệnh và **{u_count}** tế bào khỏe mạnh.")
+            
+        else:
+            st.warning("Không tìm thấy tế bào nào có kích thước phù hợp trong ảnh!")
 
 with tab_info:
     st.markdown("#### Giới thiệu hệ thống")

@@ -49,9 +49,9 @@ early_stopping = EarlyStopping(
 
 model_checkpoint = ModelCheckpoint(
     filepath=save_path, 
-    monitor='val_accuracy', 
+    monitor='val_loss',    
     save_best_only=True,    
-    mode='max',
+    mode='min',             
     verbose=1               
 )
 
