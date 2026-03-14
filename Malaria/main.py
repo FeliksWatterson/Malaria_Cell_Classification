@@ -12,7 +12,7 @@ parasitized_dir = os.path.join(base_dir, 'Parasitized')
 uninfected_dir = os.path.join(base_dir, 'Uninfected')
 
 print("Uploading data...")
-X, y = load_dataset_by_path(parasitized_dir, uninfected_dir, limit=10000) 
+X, y = load_dataset_by_path(parasitized_dir, uninfected_dir, limit=13000) 
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
