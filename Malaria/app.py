@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import streamlit as st
 from tensorflow.keras.models import load_model
+from tensorflow.keras.layers import InputLayer
 
 from modules.preprocessor import manual_histogram_equalization, manual_resize
 
@@ -26,7 +27,7 @@ def load_core_model():
         st.error(f"Model not found at: {model_path}")
         return None
 
-    return load_model(model_path)
+    return load_model(model_path, compile=False, safe_mode=False)
 
 model = load_core_model()
 
