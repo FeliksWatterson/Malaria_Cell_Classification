@@ -21,7 +21,7 @@ if os.path.exists(css_path):
 @st.cache_resource
 def load_core_model():
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(current_dir, "malaria_model.h5")
+    model_path = os.path.join(current_dir, "malaria_model.keras")
 
     if not os.path.exists(model_path):
         st.error(f"Model not found at: {model_path}")

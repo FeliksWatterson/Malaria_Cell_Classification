@@ -2,7 +2,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from modules.preprocessor import load_and_preprocess
 
-model = load_model('malaria_model.h5')
+model = load_model('malaria_model.keras')
 print("Model Loader Successfully")
 
 def make_prediction(image_path):
