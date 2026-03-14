@@ -20,6 +20,11 @@ if os.path.exists(css_path):
 
 @st.cache_resource
 def load_core_model():
+    import json
+    import h5py
+    import tensorflow as tf
+    from tensorflow.keras.models import model_from_json
+
     current_dir = os.path.dirname(os.path.abspath(__file__))
     model_path = os.path.join(current_dir, "malaria_model.h5")
 
@@ -27,7 +32,19 @@ def load_core_model():
         st.error(f"Model not found at: {model_path}")
         return None
 
-    return load_model(model_path, compile=False, safe_mode=False)
+    with h5py.File(model_path, 'r') as f:
+        model_config = f.attrs.get('model_config')
+        if isinstance(model_config, bytes):
+            model_config = model_config.decode('utf-8')
+        config_dict = json.loads(model_config)
+
+    config_str = json.dumps(config_dict).replace('"batch_shape"', '"batch_input_shape"')
+
+    model = model_from_json(config_str)
+
+    model.load_weights(model_path)
+
+    return model
 
 model = load_core_model()
 
