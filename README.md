@@ -1,1 +1,1 @@
-C:\PSTools\PsExec64.exe -accepteula -s -i cmd.exe
+Get-ChildItem C:\ -Filter PsExec64.exe -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
