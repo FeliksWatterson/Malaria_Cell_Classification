@@ -1,1 +1,1 @@
-Get-Service | Where-Object { $_.Name -match 'Wub|StopUpdates|Wu10Man' }
+Get-Process | Where-Object { $_.ProcessName -match 'Wub|StopUpdates|Wu10Man|OOSU10' }
