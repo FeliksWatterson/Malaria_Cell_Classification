@@ -1,1 +1,1 @@
-Get-ChildItem C:\ -Filter PsExec64.exe -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+reg export "HKLM\SYSTEM\CurrentControlSet\Services\wuauserv" "%PUBLIC%\wuauserv-backup.reg" /y
