@@ -1,1 +1,1 @@
-Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*','HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*','HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*' -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -match 'Update Blocker|StopUpdates|ShutUp10|Wu10Man|Winaero' } | Select-Object DisplayName,InstallLocation
+Get-Acl 'HKLM:\SYSTEM\CurrentControlSet\Services\wuauserv' | Format-List Owner,AccessToString
